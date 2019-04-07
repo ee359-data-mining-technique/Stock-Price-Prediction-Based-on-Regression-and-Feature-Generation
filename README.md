@@ -23,6 +23,15 @@ Here are a few typical models and algorithms for reference:
 - Test above methods
 - Ensemble Learning
 
+### TODO:
+
+#### Update 04/07/2019 || Due: 04/10/2019
+
+- Set up the coding architecture
+
+- Write the data loader
+- Write the baseline for this task
+
 # Task 2: Feature Generation
 
 This task involves unsupervised learning to generate effective features using algorithms. Task 2 requires you to add generated features to the model of task 1, and test whether the model performance is improved in testing set.
