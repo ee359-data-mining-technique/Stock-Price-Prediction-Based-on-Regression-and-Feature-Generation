@@ -22,3 +22,14 @@ Here are a few typical models and algorithms for reference:
 - Process dataset
 - Test above methods
 - Ensemble Learning
+
+# Task 2: Feature Generation
+
+This task involves unsupervised learning to generate effective features using algorithms. Task 2 requires you to add generated features to the model of task 1, and test whether the model performance is improved in testing set.
+Here are a few typical models and algorithms for reference:
+
+1. Simple methods such as addition, subtraction, multiplication, and polynomial combinations.
+  Mathematical tools in signal processing such as WT (wavelet transform).
+2. [Deep Feature Synthesis.](https://www.featuretools.com/)
+3. [Stacked Auto Encoder.](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0180944) A deep learning framework for financial time series using stacked auto-encoders
+  and long-short term memory 
