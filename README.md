@@ -23,6 +23,10 @@ Here are a few typical models and algorithms for reference:
 - Test above methods
 - Ensemble Learning
 
+### Dateset
+
+indicators 1~108	midPrice	**UpdateTime	UpdateMillisec**	LastPrice	Volume	LastVolume	Turnover	LastTurnover	AskPrice5	AskPrice4	AskPrice3	AskPrice2	AskPrice1	BidPrice1	BidPrice2	BidPrice3	BidPrice4	BidPrice5	AskVolume5	AskVolume4	AskVolume3	AskVolume2	AskVolume1	BidVolume1	BidVolume2	BidVolume3	BidVolume4	BidVolume5	OpenInterest	UpperLimitPrice	LowerLimitPrice
+
 ### TODO:
 
 #### Update 04/07/2019 || Due: 04/10/2019
