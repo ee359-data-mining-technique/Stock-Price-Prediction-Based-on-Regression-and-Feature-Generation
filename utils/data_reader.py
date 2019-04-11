@@ -1,13 +1,11 @@
 """
-To Jerry:
-    Change the ROOT when organizing the code
-
 Method:
-    Get_Train_Test: Get the separated training and testing dataset, with form of numpy.array [sample_num, dimensions]
-                    60% train and 40% test ;
-                    returned in order: trainX, testX, trainY, testY 
+     
     save_to_pickle: Optional choice, can be saved to pickle for convenience
-
+Features:
+    1. Morning-Afternoon Split
+    2. Normalization
+    3. Choose Label
 """
 
 #-*- coding:utf-8 -*-
@@ -16,84 +14,104 @@ import pandas as pd
 import numpy as np
 import pickle                  # OPTIONAL, if not needed, ignore it
 from sklearn.model_selection import train_test_split
-ROOT = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #CodeFramework替换成项目名
+from sklearn import preprocessing
+import re
 
-DATAROOT = os.path.join(ROOT, 'data', 'Animals_with_Attributes2-2', 'Features', 'ResNet101')#dataset替换成数据集名称
+DATAROOT = "./data/data.csv"
+COLS = ["midPrice", "LastPrice", "Volume", "LastVolume", "Turnover", "LastTurnover", 
+        "AskPrice1", "BidPrice1", "AskVolume1", "BidVolume1", "OpenInterest", "UpperLimitPrice", "LowerLimitPrice"]
 
-
-
-TRAINROOT = os.path.join(DATAROOT, 'train.json')
-DEVROOT = os.path.join(DATAROOT, 'dev.json')
-TESTROOT = os.path.join(DATAROOT, 'test.json')
-
-class Data():#在其中拆分数据的属性并定义数据预处理的函数
+class Data():
     def __init__(self):
-        self.FeatureRoot = os.path.join(DATAROOT, 'AwA2-features.txt')
-        self.FilenameRoot = os.path.join(DATAROOT, 'AwA2-filenames.txt')
-        self.LabelsRoot = os.path.join(DATAROOT, 'AwA2-labels.txt')
-        self.features = pd.read_table(self.FeatureRoot, delim_whitespace=True, names=[x for x in range(2048)])
-        self.filename = pd.read_table(self.FilenameRoot, delim_whitespace=True, names=["filename"])
-        self.labels = pd.read_table(self.LabelsRoot, delim_whitespace=True, names=["labels"])
-        self.data = pd.concat([self.features, self.filename, self.labels], axis=1)
-        self.train_data_x = np.zeros(shape=[1, 2048])
-        self.train_data_y = np.zeros(shape=[1])
-        self.test_data_x = np.zeros(shape=[1, 2048])
-        self.test_data_y = np.zeros(shape=[1])
+        self.train_data = None
+        self.train_label = None
+        self.test_data = None
+        self.test_label = None
 
-    def Get_Train_Test(self):
-        ## We are required to split the images in each category into 60% of training set and
-        ## 40% of testing set
-        ## Attention: filename is not deleted from the training and testing data
-        for label in range(1, 51):
-            tmp_data = self.data.loc[self.data["labels"]==label]
-            tmp_label = tmp_data["labels"]
-            tmp_feature = tmp_data.drop(["labels"], axis=1)
-            tmp_label = np.array(tmp_label)
-            tmp_feature = np.array(tmp_feature)
-            tmp_train_x, tmp_test_x, tmp_train_y, tmp_test_y = train_test_split(tmp_feature, tmp_label, test_size=0.4, random_state=0)
-            tmp_train_x = tmp_train_x[:, 0:2048]
-            tmp_test_x = tmp_test_x[:, 0:2048]
-            self.train_data_x = np.concatenate([self.train_data_x, tmp_train_x], axis=0)
-            self.test_data_x = np.concatenate([self.test_data_x, tmp_test_x], axis=0)
-            self.train_data_y = np.concatenate([self.train_data_y, tmp_train_y], axis=0)
-            self.test_data_y = np.concatenate([self.test_data_y, tmp_test_y], axis=0)
-            if (label % 10 == 0):
-                print ("10 categories completed")
-        self.train_data_x = self.train_data_x[1:]
-        self.test_data_x = self.test_data_x[1:]
-        self.train_data_y = self.train_data_y[1:]
-        self.test_data_y = self.test_data_y[1:]
+    def load_dataset(self, cols = COLS, seq_len = 10):
+        '''
+        1. Morning-Afternoon Split
+        2. Slide through window
+        3. Train-Test Split: 60% training set + 40% testing set
+        '''
+        wholeDataFrame = pd.read_csv(DATAROOT)
 
-        # shuffle the data
-        state = np.random.get_state()
-        np.random.shuffle(self.train_data_x)
-        np.random.set_state(state)
-        np.random.shuffle(self.train_data_y)
+        whole_dataset = wholeDataFrame.get(cols).values
+        self.raw_scaled_dataset = preprocessing.scale(whole_dataset)
 
-        state = np.random.get_state()
-        np.random.shuffle(self.test_data_x)
-        np.random.set_state(state)
-        np.random.shuffle(self.test_data_y)
+        # check the data is morning or afternoon: using re-match
+        time_stamp = wholeDataFrame["UpdateTime"].values
+        r = re.compile('.[901].*')
+        vmatch = np.vectorize(lambda x:bool(r.match(x)))
+        morning_selection = vmatch(time_stamp)
 
-        return self.train_data_x, self.test_data_x, self.train_data_y, self.test_data_y
+        # make new data set: 
+        #   data: 10 timestamp data 
+        #   label: 10-th predicted data
+        self.whole_data = []
+        self.whole_label = []
+        for i in range(len(whole_dataset) - 2*seq_len):
+            if sum(morning_selection[i:i+2*seq_len]) != 0: #and sum(morning_selection[i:i+2*seq_len]) != 2*seq_len:
+                continue # check whether it is of the same half-day
+            x, y = self._next_window(i, seq_len)
+            self.whole_data.append(x)
+            self.whole_label.append(y)
+        self.whole_data = np.array(self.whole_data)
+        self.whole_label = np.array(self.whole_label)
+
+        # Train-Test Split
+        self.train_data = self.whole_data[:int(len(self.whole_data)*0.6)]
+        self.train_label = self.whole_label[:int(len(self.whole_data)*0.6)]
+        self.test_data = self.whole_data[int(len(self.whole_data)*0.6)+1:]
+        self.test_label = self.whole_label[int(len(self.whole_data)*0.6)+1:]\
+    
+    def load_pickle(self):
+        fr_train_data = open("./data/trainX_morning.pkl", 'rb')
+        fr_train_label = open("./data/trainY_morning.pkl", 'rb')
+        fr_test_data = open("./data/testX_morning.pkl", 'rb')
+        fr_test_label = open("./data/testY_morning.pkl", 'rb')
+
+        self.train_data = pickle.load(fr_train_data)
+        self.train_label = pickle.load(fr_train_label)
+        self.test_data = pickle.load(fr_test_data)
+        self.test_label = pickle.load(fr_test_label)
+        
+        fr_train_data.close()
+        fr_train_label.close()
+        fr_test_data.close()
+        fr_test_label.close()
+
+    def get_next_train_batch(self):
+        pass
+    
+    def get_next_test_batch(self):
+        pass
+
+    def _next_window(self, start, seq_len, decaying = 1):
+        x = self.raw_scaled_dataset[start:start+seq_len]
+        label_time_data = self.raw_scaled_dataset[start+2*seq_len]
+        cur_time_data = self.raw_scaled_dataset[start+seq_len]
+        y = (label_time_data[COLS.index("AskPrice1")] + label_time_data[COLS.index("BidPrice1")] - \
+            cur_time_data[COLS.index("AskPrice1")] - cur_time_data[COLS.index("BidPrice1")])/2
+        return x, y
+    
+    def normalise_window(self):
+        pass
 
     def save_to_pickle(self):
         fw_trainX = open("trainX.pkl", 'wb')
         fw_trainY = open("trainY.pkl", 'wb')
         fw_testX = open("testX.pkl", 'wb')
         fw_testY = open("testY.pkl", 'wb')
-        pickle.dump(self.train_data_x, fw_trainX)
-        pickle.dump(self.train_data_y, fw_trainY)
-        pickle.dump(self.test_data_x, fw_testX)
-        pickle.dump(self.test_data_y, fw_testY)
+        pickle.dump(self.train_data, fw_trainX)
+        pickle.dump(self.train_label, fw_trainY)
+        pickle.dump(self.test_data, fw_testX)
+        pickle.dump(self.test_label, fw_testY)
         fw_trainX.close()
         fw_trainY.close()
         fw_testX.close()
         fw_testY.close()
-        # If want to read, use:
-        # x = open("xxx", 'rb')
-        # y = pickle.load(x)
-        # x.close()
+        
 
 if __name__ == '__main__':
     dataset = Data()

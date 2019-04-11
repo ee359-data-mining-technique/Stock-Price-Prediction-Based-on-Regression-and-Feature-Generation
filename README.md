@@ -20,6 +20,10 @@ Here are a few typical models and algorithms for reference:
 ### Sub-Tasks
 
 - Process dataset
+- Feature Engineering
+  - PCA/ Sparse PCA
+  - 特征的redundancy
+  - 做差
 - Test above methods
 - Ensemble Learning
 
@@ -32,7 +36,6 @@ indicators 1~108	midPrice	**UpdateTime	UpdateMillisec**	LastPrice	Volume	LastVol
 #### Update 04/07/2019 || Due: 04/10/2019
 
 - Set up the coding architecture
-
 - Write the data loader
 - Write the baseline for this task
 
@@ -46,3 +49,24 @@ Here are a few typical models and algorithms for reference:
 2. [Deep Feature Synthesis.](https://www.featuretools.com/)
 3. [Stacked Auto Encoder.](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0180944) A deep learning framework for financial time series using stacked auto-encoders
   and long-short term memory 
+
+# Results
+
+- Benchmark: it just take the current value for prediction value. Thus, the predicted $y$ will be $0$.
+
+### Measure
+
+- MSE
+
+|  Methods  |   Mean Square Error   |
+| :-------: | :-------------------: |
+| Benchmark | 8.109432069159126e-05 |
+|           |                       |
+|           |                       |
+|           |                       |
+|           |                       |
+|           |                       |
+|           |                       |
+|           |                       |
+|           |                       |
+
