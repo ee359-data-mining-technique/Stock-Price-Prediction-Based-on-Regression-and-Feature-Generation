@@ -4,9 +4,9 @@ class Model:
     
     def __init__(self):
         self.time_steps = 10
-        self.element_size = 13
+        self.element_size = 20
         self.LSTM_Layer_Sizes = [128, 256]
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
 
     def build_model(self):
         with tf.variable_scope("Inputs"):

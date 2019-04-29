@@ -72,15 +72,15 @@ Here are a few typical models and algorithms for reference:
 
 - MSE
 
-|   Methods   |   Mean Square Error    |
-| :---------: | :--------------------: |
-|  Benchmark  | 0.00010062250615958073 |
-| Simple LSTM |  7.70209445134349e-05  |
-|             |                        |
-|             |                        |
-|             |                        |
-|             |                        |
-|             |                        |
-|             |                        |
-|             |                        |
+|    Methods    | Mean Square Error |
+| :-----------: | :---------------: |
+|   Benchmark   |      0.8274       |
+|  Simple LSTM  |      0.8109       |
+| Random Forest |      0.8063       |
+|     GBDT      |      0.8222       |
+|   AdaBoost    |      0.9029       |
+|      CNN      |                   |
+|      NN       |      0.8274       |
+|               |                   |
+|               |                   |
 
