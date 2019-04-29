@@ -84,3 +84,92 @@ Here are a few typical models and algorithms for reference:
 |               |                   |
 |               |                   |
 
+# 第一次实验总结
+
+### 实验概要
+
+本次实验旨在用一支股票的交易数据，进行预测股票将来的走向。主要问题为运用一些监督学习的方法，对股票短时间走势进行判断。
+
+### 数据处理
+
+#### 数据集描述
+
+本次给出的数据集：
+
+- 每一秒产生三个数据。股市数据分为上下午，中间在11:30到13:30停盘，停盘时间不产生数据。
+- 数据包含股票的原始交易数据：交易价格，交易量，交易时间等等（详见数据集）
+- 数据还包括给出的108维特征（feature）数据，此数据已经做出了标准化（Normalization），分别命名为indicator1到indicator108。
+
+#### 数据集处理
+
+本次争对此数据集做出如下处理：
+
+- 将特征数据降维：我们运用PCA对特征数据进行了降维
+
+- 训练数据：我们取降维的特征数据作为训练数据，每次取一定时间间隔的数据（即代码中的seq_len），作为一个训练数据。这里可以把它理解为数据窗，数据窗框入一段连续时间的数据作为一个训练数据。
+
+- 训练标签：我们取给出的一段时间后的数据（即代码中的predict_len）到数据框现在时间对应数据的AskPrice1和BidPrice1的差值作为数据label：
+  $$
+  label = (AskPrice_{n+t} + BidPrice_{n+t} - AskPrice_t - BidPrice_t)/2
+  $$
+
+- 当遇到上午与下午间隔，隔天间隔的数据点，我们不取对应的训练数据。此外我们将上午和下午数据视为一致，放入同一个训练集（如果视为不同分布，其实可以放入不同训练集）。
+
+- 以以上方法取出数据集后，我们对数据集进行洗牌（shuffle），然后分割60%为训练集，40%为测试集。
+
+### 尝试方法
+
+我们以Mean Square Error作为衡量预测准确率的标准，代码上传在[Github仓库](https://github.com/ee359-data-mining-technique/Stock-Price-Prediction-Based-on-Regression-and-Feature-Generation)中。
+
+- Simple Prediction
+
+  我们给出一个简单的预测方法，以作为此任务的benchmark：该方法用时间框的最后一个数据直接当作预测数据，这样预测的值（即Price的插值），由于相同，全都为0。这样算出来的MSE，我们作为Benchmark研究其他算法的表现。
+
+其余我们还实现了：
+
+- Random Forest (by Sci-Learn)
+- Gradient Boosting Decision Tree (by Sci-Learn)
+- Ada Boost (by Sci-Learn)
+- Neural Network (by Tensorflow)
+- Convolutional Neural Network (by Tensorflow)
+- LSTM Neural Network (by Tensorflow)
+
+### 实验结果
+
+实验结果如下
+
+|    Methods    | Mean Square Error |
+| :-----------: | :---------------: |
+|   Benchmark   |      0.8274       |
+|     LSTM      |      0.8274       |
+| Random Forest |      0.8220       |
+|     GBDT      |      0.8222       |
+|   Ada Boost   |      0.9029       |
+|      CNN      |      0.8278       |
+|      NN       |      0.8274       |
+
+由此实验结果，我们有如下观察：
+
+- 相对来说，Random Forest方法效果最好，其次为GBDT方法。
+- 神经网络的方法在此数据上表现得不好，效果并没有超过Benchmark，是一个相当差的结果
+
+### 待解决的困难
+
+- ISSUE 1: 
+
+  在训练过程中我们发现，LSTM模型和NN模型最后收敛到对于所有输入的输出都是0，也就是和Benchmark没有区别。为什么是0呢，我们认为和数据集的制作有关。在数据集的制作中，label的选取为Price的差值，而此差值在大部分情况下都是0（因为时间差很小，导致价格变动不大）。
+
+  对于此情况，我们取了predict length更大的数据，使差值变得不那么多0，但LSTM和NN的表现仍旧。所以此问题需要解决：
+
+  - 大概率是数据集制作的原因，因为label中很多0，导致最后学到的知识就是产生0，所以导致算法无效
+  - 也有可能是问题的原因，我们当作一个回归问题来做，而label实际上多是整数值，而且大多在[-5, 5]的区间内，也就是此问题还可以当作分类问题做
+
+  下一步我们将解决这个问题。
+
+- ISSUE 2：
+
+  尝试不同地seq_len, predict_len, jump等参数对数据集的影响
+
+  尝试不同地衡量效果的方法
+
+  尝试Random Forest和Boost模型的参数，求取最优值

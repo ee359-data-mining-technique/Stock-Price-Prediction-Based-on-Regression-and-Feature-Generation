@@ -67,7 +67,7 @@ class Data():
 
     def load_dataset(self, seq_len = 10, jump = 10, predict_len = 90):
         '''
-        1. Morning-Afternoon Split
+        1. Morning-Afternoon Split (suppressed)
         2. Slide through window
         3. Shuffle
         4. Train-Test Split: 60% training set + 40% testing set
