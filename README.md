@@ -39,6 +39,11 @@ indicators 1~108	midPrice	**UpdateTime	UpdateMillisec**	LastPrice	Volume	LastVol
 - Write the data loader
 - Write the baseline for this task
 
+#### Update 04/11/2019
+
+- Write LSTM with tensorflow
+- Think about how to measure feature importance
+
 # Task 2: Feature Generation
 
 This task involves unsupervised learning to generate effective features using algorithms. Task 2 requires you to add generated features to the model of task 1, and test whether the model performance is improved in testing set.
@@ -50,23 +55,32 @@ Here are a few typical models and algorithms for reference:
 3. [Stacked Auto Encoder.](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0180944) A deep learning framework for financial time series using stacked auto-encoders
   and long-short term memory 
 
+# Process
+
+1. 数据处理过程
+   - Normalize 整个数据的每一维
+   - 把上午数据和下午数据分开
+   - 数据为每10个一个框 + 往后第10个时间的  (the future 10-th tick's AskPrice1 + the future 10-th tick's BidPrice1 - the current tick's AskPrice1 - the current tick's BidPrice1) / 2
+   - 分别存入上午/下午数据
+
 # Results
 
 - Benchmark: it just take the current value for prediction value. Thus, the predicted $y$ will be $0$.
+- Simple LSTM: three layer LSTM with one dense layer (implemented by Keras)
 
 ### Measure
 
 - MSE
 
-|  Methods  |   Mean Square Error   |
-| :-------: | :-------------------: |
-| Benchmark | 8.109432069159126e-05 |
-|           |                       |
-|           |                       |
-|           |                       |
-|           |                       |
-|           |                       |
-|           |                       |
-|           |                       |
-|           |                       |
+|   Methods   |   Mean Square Error    |
+| :---------: | :--------------------: |
+|  Benchmark  | 0.00010062250615958073 |
+| Simple LSTM |  7.70209445134349e-05  |
+|             |                        |
+|             |                        |
+|             |                        |
+|             |                        |
+|             |                        |
+|             |                        |
+|             |                        |
 
