@@ -6,7 +6,7 @@ class VanillaNetworkModel:
     def __init__(self):
         self.time_steps = 10
         self.element_size = 20
-        self.layer_size = [16, 32, 16]
+        self.layer_size = [8, 32, 8]
         self.learning_rate = 0.005
 
     def build_model(self):
@@ -78,6 +78,7 @@ class VanillaNetworkModel:
                 self.y_orig: train_Y
             }
         )
+        # print(y_pred[:10])
         return mse_loss
 
     def evaluate_model(self, test_X, test_Y):

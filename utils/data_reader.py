@@ -65,7 +65,7 @@ class Data():
         self.data_cols = COLS
         self.label_cols = ["AskPrice1", "BidPrice1"]
 
-    def load_dataset(self, seq_len = 10, jump = 10, predict_len = 30):
+    def load_dataset(self, seq_len = 10, jump = 10, predict_len = 90):
         '''
         1. Morning-Afternoon Split
         2. Slide through window
@@ -197,7 +197,8 @@ class Data():
 
 if __name__ == '__main__':
     DataLoader = Data()
-    DataLoader.load_dataset()
-    # DataLoader.train_test_split()
-    # print(DataLoader.train_data.shape)
-    # print(DataLoader.train_label.shape)
+    # DataLoader.load_dataset()
+    DataLoader.train_test_split()
+    print(DataLoader.train_data.shape)
+    print(DataLoader.train_label.shape)
+    print(DataLoader.test_label[:100])

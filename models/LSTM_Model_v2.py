@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-class Model:
+class LSTM_Model:
     
     def __init__(self):
         self.time_steps = 10
