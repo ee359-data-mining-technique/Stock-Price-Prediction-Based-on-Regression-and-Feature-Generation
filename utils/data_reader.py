@@ -97,7 +97,7 @@ class Data():
         self.whole_data = []
         self.whole_label = []
         for i in range(0, len(whole_dataset) - seq_len - predict_len, jump):
-            if sum(morning_selection[i:i + seq_len + predict_len]) != 2*seq_len and \
+            if sum(morning_selection[i:i + seq_len + predict_len]) != (seq_len + predict_len) and \
                sum(morning_selection[i:i+ seq_len + predict_len]) != 0:
                 continue # check whether it is of the same half-day
             x, y = self._next_window(i, seq_len, predict_len)
